@@ -53,3 +53,5 @@ components:
         memory: 512Mi
     instances:
       dev: {}
+    expose:
+      host: demo-taskboard-api
