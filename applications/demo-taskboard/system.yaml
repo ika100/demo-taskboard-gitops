@@ -27,4 +27,29 @@ environments:
     policy: "off"
     # host: "{component}.example.com"
 # components: add with `/component:new`; each runs in the environments listed under its `instances`.
-components: {}
+components:
+  demo-taskboard-api:
+    type: service
+    lang: python
+    repo: ika100/demo-taskboard-api
+    image: ghcr.io/ika100/demo-taskboard-api
+    port: 8080
+    probes:
+      liveness: /health
+      readiness: /ready
+    user: 10001
+    metrics: /metrics
+    volumes:
+      tmp: /tmp
+    env:
+      LOG_LEVEL: INFO
+    secretRefs: []
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    instances:
+      dev: {}
