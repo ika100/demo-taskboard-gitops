@@ -1,0 +1,20 @@
+# demo-taskboard-gitops
+
+GitOps repo for the demo-taskboard system
+
+GitOps repo for the **demo-taskboard** system (platform shape `gitops-app`). See `CLAUDE.md` for layout, pin policy and commands.
+
+```bash
+devbox shell
+devbox run cluster-up              # local k3d cluster + ArgoCD + credentials + root Application
+# real cluster, by a human: KUBE_CONTEXT=<ctx> devbox run bootstrap
+/component:add my-api my-web         # in Claude Code: declare components
+devbox run quality                    # validate overlays + ApplicationSets
+/instance:promote my-api --to staging   # pin staging to the dev image
+```
+
+Component PRs opened by `/component:ship` carry a `Service-ref: <owner>/<repo>@<branch>` line in their body; CI then validates the Components against that branch's CRDs. This needs the secret `SERVICE_REPOS_READ_TOKEN` (Contents: read on the component repos): `gh secret set SERVICE_REPOS_READ_TOKEN -R <this repo>`; `cplat platform doctor` checks it. <!-- pragma: allowlist secret -->
+
+Firing alerts become issues (spec 092): `.github/workflows/alerts.yml` polls every 15 minutes, only on the self-hosted runner (`CI_RUNNER`). Declare rules under `environments.<env>.observability` in `system.yaml` (`ServiceDown` is built in; `alerts: false` turns the poll off). Issues go to each component's `repo`, which needs the secret `ALERTS_TOKEN` (Issues: read and write; `cplat platform doctor` checks it), else to this repo. Try it: `gh workflow run alerts.yml -f dry_run=true`. See `CLAUDE.md`.
+
+Updates to this skeleton: `/platform:update`.
