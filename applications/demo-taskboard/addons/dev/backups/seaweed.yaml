@@ -1,0 +1,41 @@
+apiVersion: seaweed.seaweedfs.com/v1
+kind: Seaweed
+metadata:
+  name: demo-taskboard-backups
+  labels:
+    app.kubernetes.io/name: backups
+    app.kubernetes.io/part-of: demo-taskboard
+    app.kubernetes.io/managed-by: gitops-app
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+spec:
+  image: chrislusf/seaweedfs:4.51@sha256:f7a49e3f3972ebed5be2ed4befa4a0c68eb7bdddba6e692d42729ceb545134b8
+  volumeServerDiskCount: 1
+  master:
+    replicas: 1
+    volumeSizeLimitMB: 1024
+    persistence:
+      enabled: true
+      resources:
+        requests:
+          storage: 1Gi
+  volume:
+    replicas: 1
+    requests:
+      storage: 10Gi
+  filer:
+    replicas: 1
+    persistence:
+      enabled: true
+      resources:
+        requests:
+          storage: 1Gi
+    s3:
+      enabled: true
+    config: '[leveldb2]
+
+      enabled = true
+
+      dir = "/data/filerldb2"
+
+      '

@@ -1,0 +1,24 @@
+apiVersion: seaweed.seaweedfs.com/v1
+kind: Bucket
+metadata:
+  name: demo-taskboard-backups
+  labels:
+    app.kubernetes.io/name: backups
+    app.kubernetes.io/part-of: demo-taskboard
+    app.kubernetes.io/managed-by: gitops-app
+  annotations:
+    argocd.argoproj.io/sync-options: Delete=false
+spec:
+  name: demo-taskboard-backups
+  clusterRef:
+    name: demo-taskboard-backups
+  reclaimPolicy: Retain
+  versioning: Suspended
+  owner: demo-taskboard-backups
+  access:
+  - user: demo-taskboard-backups
+    actions:
+    - Read
+    - Write
+    - List
+    - Tagging

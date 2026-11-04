@@ -60,6 +60,7 @@ components:
     instances:
       dev: {}
       staging: {}
+      prod: {}
     expose:
       host: demo-taskboard-api
     uses:
@@ -93,6 +94,7 @@ components:
     instances:
       dev: {}
       staging: {}
+      prod: {}
     expose:
       host: demo-taskboard-web
 resources:

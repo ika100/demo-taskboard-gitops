@@ -1,0 +1,140 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-taskboard-api
+  labels: &id001
+    app: demo-taskboard-api
+    app.kubernetes.io/name: demo-taskboard-api
+    app.kubernetes.io/part-of: demo-taskboard
+    app.kubernetes.io/managed-by: gitops-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-taskboard-api
+  template:
+    metadata:
+      labels: *id001
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: app
+        image: ghcr.io/ika100/demo-taskboard-api
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        - name: LOG_LEVEL
+          value: INFO
+        - name: PORT
+          value: '8080'
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: uri
+        - name: PGHOST
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: host
+        - name: PGPORT
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: port
+        - name: PGDATABASE
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: dbname
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: user
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: password
+        - name: S3_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: endpoint
+        - name: S3_BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: bucket
+        - name: S3_REGION
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: region
+        - name: S3_FORCE_PATH_STYLE
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: forcePathStyle
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: accessKeyId
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: secretAccessKey
+        - name: AWS_REGION
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: region
+        - name: AWS_ENDPOINT_URL_S3
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: endpoint
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 3
+          failureThreshold: 40
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          periodSeconds: 5
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+          runAsUser: 10001
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
