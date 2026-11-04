@@ -1,0 +1,23 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: demo-taskboard-web
+  labels:
+    app: demo-taskboard-web
+    app.kubernetes.io/name: demo-taskboard-web
+    app.kubernetes.io/part-of: demo-taskboard
+    app.kubernetes.io/managed-by: gitops-app
+spec:
+  parentRefs:
+  - name: traefik-gateway
+    namespace: kube-system
+  hostnames:
+  - demo-taskboard-web.demo-taskboard-dev.localhost
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: demo-taskboard-web
+      port: 80

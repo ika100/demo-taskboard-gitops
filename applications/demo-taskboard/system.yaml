@@ -55,3 +55,32 @@ components:
       dev: {}
     expose:
       host: demo-taskboard-api
+  demo-taskboard-web:
+    type: website
+    lang: typescript
+    repo: ika100/demo-taskboard-web
+    image: ghcr.io/ika100/demo-taskboard-web
+    port: 3000
+    probes:
+      liveness: /api/health
+      readiness: /api/ready
+    user: 1000
+    metrics: /api/metrics
+    volumes:
+      tmp: /tmp
+      next-cache: /app/.next/cache
+    env:
+      NODE_ENV: production
+      API_URL: http://demo-taskboard-api
+    secretRefs: []
+    resources:
+      requests:
+        cpu: 100m
+        memory: 192Mi
+      limits:
+        cpu: 1000m
+        memory: 512Mi
+    instances:
+      dev: {}
+    expose:
+      host: demo-taskboard-web
