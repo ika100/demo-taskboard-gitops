@@ -55,6 +55,8 @@ components:
       dev: {}
     expose:
       host: demo-taskboard-api
+    uses:
+      - postgres
   demo-taskboard-web:
     type: website
     lang: typescript
@@ -84,3 +86,13 @@ components:
       dev: {}
     expose:
       host: demo-taskboard-web
+resources:
+  postgres:
+    type: database
+    version: 17
+    replicas: 1
+    storage: 1Gi
+    instances:
+      prod:
+        replicas: 3
+        storage: 20Gi
