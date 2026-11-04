@@ -1,7 +1,7 @@
 ---
 spec_id: 002-nightly-prod-database-backups-to-an-in
 title: Nightly prod database backups to an in-cluster bucket
-status: draft
+status: approved
 priority: P1
 shape: gitops-app
 ---
@@ -80,3 +80,4 @@ Before the first prod promotion:
 - 2026-11-04 created
 - 2026-11-04 amended: 4 open questions answered (03:00, 30 days, prod only, drill before first prod promotion); no criterion added or withdrawn.
 - 2026-11-04 amended: AC-002.14 drill moves to right after the first prod promotion (prod's database only exists from then); the API receives the backup bucket's credentials (platform constraint), noted as accepted risk. AC-002.14 withdrawn and replaced by AC-002.15 (behaviour changed, so a new id per the amending rules).
+- 2026-11-04 approved
