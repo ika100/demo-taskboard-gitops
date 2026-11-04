@@ -24,9 +24,10 @@ environments:
     policy: "off"
     # host: "{component}.staging.example.com"
   prod:
-    policy: "off"
+    policy: "enforce"
     # host: "{component}.example.com"
 # components: add with `/component:new`; each runs in the environments listed under its `instances`.
+    host: '{component}.{system}-prod.localhost'
 components:
   demo-taskboard-api:
     type: service
