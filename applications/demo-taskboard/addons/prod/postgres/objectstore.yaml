@@ -1,0 +1,27 @@
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: demo-taskboard-postgres
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: demo-taskboard
+    app.kubernetes.io/managed-by: gitops-app
+spec:
+  retentionPolicy: 30d
+  configuration:
+    destinationPath: s3://demo-taskboard-backups/databases
+    endpointURL: http://demo-taskboard-backups-filer.demo-taskboard-prod.svc:8333
+    s3Credentials:
+      accessKeyId:
+        name: demo-taskboard-backups-app
+        key: accessKeyId
+      secretAccessKey:
+        name: demo-taskboard-backups-app
+        key: secretAccessKey
+      region:
+        name: demo-taskboard-backups-app
+        key: region
+    wal:
+      compression: gzip
+    data:
+      compression: gzip

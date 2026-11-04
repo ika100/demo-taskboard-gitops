@@ -66,7 +66,9 @@ metadata:
 spec:
   generators:
   - list:
-      elements: []
+      elements:
+      - name: demo-taskboard-api
+      - name: demo-taskboard-web
   template:
     metadata:
       name: '{{name}}-prod'
@@ -95,6 +97,7 @@ spec:
   generators:
   - list:
       elements:
+      - name: backups
       - name: postgres
   template:
     metadata:
@@ -114,6 +117,12 @@ spec:
           selfHeal: true
         syncOptions:
         - CreateNamespace=true
+        retry:
+          limit: 10
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 10m
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -153,6 +162,7 @@ spec:
   generators:
   - list:
       elements:
+      - name: backups
       - name: postgres
   template:
     metadata:
@@ -172,6 +182,12 @@ spec:
           selfHeal: true
         syncOptions:
         - CreateNamespace=true
+        retry:
+          limit: 10
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 10m
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -195,6 +211,71 @@ spec:
       destination:
         server: https://kubernetes.default.svc
         namespace: demo-taskboard-staging
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: demo-taskboard-addons-prod
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - name: backups
+      - name: postgres
+  template:
+    metadata:
+      name: addon-{{name}}-prod
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/ika100/demo-taskboard-gitops
+        targetRevision: main
+        path: applications/demo-taskboard/addons/prod/{{name}}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: demo-taskboard-prod
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        retry:
+          limit: 10
+          backoff:
+            duration: 30s
+            factor: 2
+            maxDuration: 10m
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: demo-taskboard-policies-prod
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - name: guardrails
+  template:
+    metadata:
+      name: policy-{{name}}-prod
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/ika100/demo-taskboard-gitops
+        targetRevision: main
+        path: applications/demo-taskboard/policies/prod
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: demo-taskboard-prod
       syncPolicy:
         automated:
           prune: true

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-taskboard-web
+  labels:
+    app: demo-taskboard-web
+    app.kubernetes.io/name: demo-taskboard-web
+    app.kubernetes.io/part-of: demo-taskboard
+    app.kubernetes.io/managed-by: gitops-app
+spec:
+  type: ClusterIP
+  selector:
+    app: demo-taskboard-web
+  ports:
+  - name: http
+    port: 80
+    targetPort: http

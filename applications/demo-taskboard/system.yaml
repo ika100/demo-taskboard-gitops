@@ -60,10 +60,12 @@ components:
     instances:
       dev: {}
       staging: {}
+      prod: {}
     expose:
       host: demo-taskboard-api
     uses:
       - postgres
+      - backups
   demo-taskboard-web:
     type: website
     lang: typescript
@@ -92,6 +94,7 @@ components:
     instances:
       dev: {}
       staging: {}
+      prod: {}
     expose:
       host: demo-taskboard-web
 resources:
@@ -104,3 +107,12 @@ resources:
       prod:
         replicas: 3
         storage: 20Gi
+        # spec 002: nightly at 03:00 UTC, 30 days, to the in-cluster bucket `backups`
+        backup:
+          to: backups
+          schedule: "0 3 * * *"
+          retention: 30d
+  backups:
+    type: bucket
+    storage: 10Gi
+    versioning: false

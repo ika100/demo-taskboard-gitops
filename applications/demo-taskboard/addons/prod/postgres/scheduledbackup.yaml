@@ -1,0 +1,17 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: demo-taskboard-postgres
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/part-of: demo-taskboard
+    app.kubernetes.io/managed-by: gitops-app
+spec:
+  schedule: 0 0 3 * * *
+  immediate: true
+  backupOwnerReference: none
+  cluster:
+    name: demo-taskboard-postgres
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io

@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- deployment.yaml
+- httproute.yaml
+- service.yaml
+images:
+- name: ghcr.io/ika100/demo-taskboard-web
+  newTag: 0.1.1

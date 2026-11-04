@@ -71,6 +71,46 @@ spec:
             secretKeyRef:
               name: demo-taskboard-postgres-app
               key: password
+        - name: S3_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: endpoint
+        - name: S3_BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: bucket
+        - name: S3_REGION
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: region
+        - name: S3_FORCE_PATH_STYLE
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: forcePathStyle
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: accessKeyId
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: secretAccessKey
+        - name: AWS_REGION
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: region
+        - name: AWS_ENDPOINT_URL_S3
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-backups-app
+              key: endpoint
         resources:
           requests:
             cpu: 50m

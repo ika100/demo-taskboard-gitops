@@ -1,0 +1,50 @@
+apiVersion: policies.kyverno.io/v1
+kind: NamespacedValidatingPolicy
+metadata:
+  name: platform-guardrails
+  namespace: demo-taskboard-prod
+  labels:
+    app.kubernetes.io/part-of: demo-taskboard
+    app.kubernetes.io/managed-by: gitops-app
+spec:
+  validationActions:
+  - Deny
+  matchConstraints:
+    resourceRules:
+    - apiGroups:
+      - apps
+      apiVersions:
+      - v1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - deployments
+  variables:
+  - name: pod
+    expression: object.spec.template.spec
+  - name: registries
+    expression: '["ghcr.io/ika100/"]'
+  validations:
+  - expression: variables.pod.containers.all(c, c.?securityContext.?runAsNonRoot.orValue(variables.pod.?securityContext.?runAsNonRoot.orValue(false))
+      && c.?securityContext.?runAsUser.orValue(0) > 0)
+    message: 'containers must run as a numeric non-root user (runAsNonRoot: true,
+      runAsUser > 0)'
+  - expression: variables.pod.containers.all(c, c.?securityContext.?readOnlyRootFilesystem.orValue(false))
+    message: 'containers need readOnlyRootFilesystem: true'
+  - expression: variables.pod.containers.all(c, !c.?securityContext.?allowPrivilegeEscalation.orValue(true)
+      && c.?securityContext.?capabilities.?drop.orValue([]).exists(d, d == "ALL"))
+    message: 'containers need allowPrivilegeEscalation: false and must drop ALL capabilities'
+  - expression: '!variables.pod.?hostNetwork.orValue(false) && !variables.pod.?hostPID.orValue(false)
+      && variables.pod.containers.all(c, !c.?securityContext.?privileged.orValue(false))
+      && variables.pod.?volumes.orValue([]).all(v, !has(v.hostPath))'
+    message: privileged containers, host namespaces and hostPath volumes are not allowed
+  - expression: variables.pod.containers.all(c, c.?resources.?requests.?cpu.hasValue()
+      && c.?resources.?requests.?memory.hasValue() && c.?resources.?limits.?memory.hasValue())
+    message: containers need CPU and memory requests and a memory limit
+  - expression: object.metadata.?labels["app.kubernetes.io/part-of"].hasValue()
+    message: workloads need the label app.kubernetes.io/part-of
+  - expression: variables.pod.containers.all(c, variables.registries.exists(r, c.image.startsWith(r)))
+    message: 'images must come from an allowed registry: ghcr.io/ika100/'
+  - expression: variables.pod.containers.all(c, c.image.contains(":") && !c.image.endsWith(":latest"))
+    message: images must be pinned to a tag other than latest
