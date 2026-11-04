@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-taskboard-api
+  labels: &id001
+    app: demo-taskboard-api
+    app.kubernetes.io/name: demo-taskboard-api
+    app.kubernetes.io/part-of: demo-taskboard
+    app.kubernetes.io/managed-by: gitops-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-taskboard-api
+  template:
+    metadata:
+      labels: *id001
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: app
+        image: ghcr.io/ika100/demo-taskboard-api
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        - name: LOG_LEVEL
+          value: INFO
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://otel-collector:4318
+        - name: OTEL_EXPORTER_OTLP_PROTOCOL
+          value: http/protobuf
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: service.namespace=demo-taskboard,deployment.environment=staging
+        - name: OTEL_SDK_DISABLED
+          value: 'false'
+        - name: OTEL_SERVICE_NAME
+          value: demo-taskboard-api
+        - name: PORT
+          value: '8080'
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: uri
+        - name: PGHOST
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: host
+        - name: PGPORT
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: port
+        - name: PGDATABASE
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: dbname
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: user
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: demo-taskboard-postgres-app
+              key: password
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 3
+          failureThreshold: 40
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          periodSeconds: 5
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+          runAsUser: 10001
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
