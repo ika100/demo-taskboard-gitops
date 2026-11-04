@@ -23,6 +23,7 @@ environments:
     promote: after-dev-smoke
     policy: "off"
     # host: "{component}.staging.example.com"
+    host: '{component}.{system}-staging.localhost'
   prod:
     policy: "enforce"
     # host: "{component}.example.com"
