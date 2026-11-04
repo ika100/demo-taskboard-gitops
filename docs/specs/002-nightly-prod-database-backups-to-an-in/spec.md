@@ -42,13 +42,15 @@ Restore:
 - **AC-002.7** Given a restore of the prod database was started, when it has finished and the operator has not yet switched to it, then the running system still uses the current prod database: `GET /tasks` in prod returns the same tasks as before the restore, and new tasks can still be created.
 - **AC-002.8** Given a finished restore, when the operator switches prod to it, then `GET /tasks` in prod returns the tasks of the restored point in time, without a new image or a change in the API or the web app, and after the switch nightly backups continue for the database now in use.
 - **AC-002.9** Given a finished restore, when the operator discards it, then the restored copy is removed and prod keeps using its current database with its tasks unchanged.
-- **AC-002.10** Given a restore or a switch in prod is requested, when the operator has not explicitly confirmed that it targets prod, then nothing is restored or switched and the operator is told that prod needs explicit confirmation.
+- ~~**AC-002.10**~~ withdrawn 2026-11-04: starting a restore only creates a separate copy and leaves prod unchanged, so it needs no confirmation; replaced by AC-002.16.
+- **AC-002.16** Given a finished restore of the prod database, when the operator asks to switch prod to it or to discard it without explicitly confirming that it targets prod, then nothing is switched or discarded, prod keeps its current database and the restored copy, and the operator is told that prod needs explicit confirmation.
 - **AC-002.11** Given a restore to a point in time older than the oldest kept backup (more than 30 days ago) or in the future is requested, when it is started, then it is refused with a message naming the earliest and latest restorable times, and prod is unchanged.
 
 Visibility and failures:
 
-- **AC-002.12** Given the operator looks at the status overview of the system, when prod has backups configured, then it shows for the prod database the completion time of the last successful backup, and marks it as failing when the most recent scheduled backup did not succeed or no backup succeeded in the last 26 hours.
-- **AC-002.13** Given the backup bucket cannot be reached, when a backup is due, then the backup is reported as failed (AC-002.12), and the prod system keeps answering `GET /tasks` and `POST /tasks` as before.
+- ~~**AC-002.12**~~ withdrawn 2026-11-04: the platform has no staleness rule ("no backup succeeded in the last 26 hours"); replaced by AC-002.17.
+- **AC-002.17** Given the operator looks at the status overview of the system, when prod has backups configured, then it shows for the prod database the completion time of the last successful backup, and marks backups as failing when the continuous capture of changes into the bucket fails or the most recent backup failed.
+- **AC-002.13** Given the backup bucket cannot be reached, when a backup is due, then the backup is reported as failed (AC-002.17), and the prod system keeps answering `GET /tasks` and `POST /tasks` as before.
 
 Before the first prod promotion:
 
@@ -67,10 +69,11 @@ Before the first prod promotion:
 - Encryption of backups beyond what the in-cluster bucket provides, and access rules for the bucket beyond AC-002.5.
 - Regular restore drills after the first one (AC-002.15); a recurring drill can be a later spec.
 - Keeping the backup bucket's credentials away from the task API: the platform requires a prod component to use the bucket, so demo-taskboard-api receives them; a platform change to back up without that is a later spec.
+- Detecting a backup schedule that silently never runs (no successful backup for longer than a day): a platform follow-up.
 
 ## Open questions
 
-- ~~At what time should the nightly backup run?~~ Answered: 03:00 cluster time; see AC-002.1, AC-002.12.
+- ~~At what time should the nightly backup run?~~ Answered: 03:00 cluster time; see AC-002.1.
 - ~~How long should backups be kept, and so how far back can prod be restored?~~ Answered: 30 days; see AC-002.4, AC-002.11.
 - ~~Should dev and staging be backed up too?~~ Answered: no, prod only; see Non-goals.
 - ~~Is a restore drill in prod (one on-demand backup, a restore into a separate copy, then discard) required before the first prod promotion?~~ Answered: yes; see AC-002.15 (was AC-002.14).
@@ -80,4 +83,7 @@ Before the first prod promotion:
 - 2026-11-04 created
 - 2026-11-04 amended: 4 open questions answered (03:00, 30 days, prod only, drill before first prod promotion); no criterion added or withdrawn.
 - 2026-11-04 amended: AC-002.14 drill moves to right after the first prod promotion (prod's database only exists from then); the API receives the backup bucket's credentials (platform constraint), noted as accepted risk. AC-002.14 withdrawn and replaced by AC-002.15 (behaviour changed, so a new id per the amending rules).
+- 2026-11-04 approved
+- 2026-11-04 draft: amend: AC-002.10 and AC-002.12 narrowed to what the platform does
+- 2026-11-04 amended: AC-002.10 and AC-002.12 narrowed to what the platform provides (confirmation for switch and discard; failing on archiving or a failed backup, no staleness rule); reported as platform follow-ups. AC-002.10 withdrawn and replaced by AC-002.16, AC-002.12 withdrawn and replaced by AC-002.17; AC-002.13 now refers to AC-002.17.
 - 2026-11-04 approved
