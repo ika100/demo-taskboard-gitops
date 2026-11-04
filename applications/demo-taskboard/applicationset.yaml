@@ -112,3 +112,32 @@ spec:
           selfHeal: true
         syncOptions:
         - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: demo-taskboard-addons-config-dev
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - name: observability
+  template:
+    metadata:
+      name: addon-{{name}}-dev
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/ika100/demo-taskboard-gitops
+        targetRevision: main
+        path: applications/demo-taskboard/addons/dev/{{name}}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: demo-taskboard-dev
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
