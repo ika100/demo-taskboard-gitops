@@ -1,7 +1,7 @@
 ---
 spec_id: 001-persistent-tasks-and-web-task-list
 title: Persistent tasks and web task list
-status: draft
+status: approved
 priority: P1
 shape: gitops-app
 ---
@@ -80,3 +80,4 @@ Web create form:
 - 2026-11-04 created
 - 2026-11-04 amended: removed the (smoke) marker from AC-001.6 (a gitops-app spec has no smoke tests; the component slices choose their own); behaviour unchanged.
 - 2026-11-04 amended: all 10 open questions answered with the suggested answers and struck through. Clarified the superseded API spec 001 items above AC-001.1 and the stored date format in AC-001.7 (same behaviour); non-goals now state no sign-in for now, no cap on the list, in-memory tasks dropped and backups in a separate spec before the first prod promotion. No criterion added or withdrawn.
+- 2026-11-04 approved
