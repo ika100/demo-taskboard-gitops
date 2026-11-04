@@ -1,5 +1,10 @@
 # Written by `cplat resource restore` (spec 117). render.py reads it; do not edit it by hand.
-next: 2
+next: 3
 clusters:
 - name: demo-taskboard-postgres
   role: active
+- name: demo-taskboard-postgres-g2
+  role: restored
+  from:
+    server: demo-taskboard-postgres
+    to: latest
