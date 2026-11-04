@@ -19,16 +19,20 @@ environments:
   dev:
     host: "{component}.{system}-dev.localhost"
     policy: "off"
+    observability:
+      ui: lgtm
   staging:
     promote: after-dev-smoke
     policy: "off"
     # host: "{component}.staging.example.com"
     host: '{component}.{system}-staging.localhost'
+    observability:
+      ui: lgtm
   prod:
     policy: "enforce"
     # host: "{component}.example.com"
-# components: add with `/component:new`; each runs in the environments listed under its `instances`.
     host: '{component}.{system}-prod.localhost'
+# components: add with `/component:new`; each runs in the environments listed under its `instances`.
 components:
   demo-taskboard-api:
     type: service
