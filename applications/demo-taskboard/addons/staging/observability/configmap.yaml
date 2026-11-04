@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector
+  labels:
+    app.kubernetes.io/name: otel-collector
+    app.kubernetes.io/part-of: demo-taskboard
+    app.kubernetes.io/managed-by: gitops-app
+data:
+  config.yaml: "extensions:\n  health_check:\n    endpoint: 0.0.0.0:13133\nreceivers:\n\
+    \  otlp:\n    protocols:\n      grpc:\n        endpoint: 0.0.0.0:4317\n      http:\n\
+    \        endpoint: 0.0.0.0:4318\n  prometheus:\n    config:\n      scrape_configs:\n\
+    \      - job_name: demo-taskboard-api\n        scrape_interval: 30s\n        metrics_path:\
+    \ /metrics\n        static_configs:\n        - targets:\n          - demo-taskboard-api.demo-taskboard-staging.svc:80\n\
+    \      - job_name: demo-taskboard-web\n        scrape_interval: 30s\n        metrics_path:\
+    \ /api/metrics\n        static_configs:\n        - targets:\n          - demo-taskboard-web.demo-taskboard-staging.svc:80\n\
+    processors:\n  memory_limiter:\n    check_interval: 1s\n    limit_percentage:\
+    \ 80\n    spike_limit_percentage: 25\n  batch: {}\n  resource:\n    attributes:\n\
+    \    - key: deployment.environment\n      value: staging\n      action: upsert\n\
+    \    - key: service.namespace\n      value: demo-taskboard\n      action: upsert\n\
+    exporters:\n  debug:\n    verbosity: basic\n  otlphttp/backend:\n    endpoint:\
+    \ http://lgtm.observability.svc:4318\nservice:\n  extensions:\n  - health_check\n\
+    \  pipelines:\n    traces:\n      receivers:\n      - otlp\n      processors:\n\
+    \      - memory_limiter\n      - resource\n      - batch\n      exporters:\n \
+    \     - debug\n      - otlphttp/backend\n    metrics:\n      receivers:\n    \
+    \  - otlp\n      - prometheus\n      processors:\n      - memory_limiter\n   \
+    \   - resource\n      - batch\n      exporters:\n      - debug\n      - otlphttp/backend\n\
+    \    logs:\n      receivers:\n      - otlp\n      processors:\n      - memory_limiter\n\
+    \      - resource\n      - batch\n      exporters:\n      - debug\n      - otlphttp/backend\n"

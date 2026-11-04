@@ -59,6 +59,7 @@ components:
         memory: 512Mi
     instances:
       dev: {}
+      staging: {}
     expose:
       host: demo-taskboard-api
     uses:
@@ -90,6 +91,7 @@ components:
         memory: 512Mi
     instances:
       dev: {}
+      staging: {}
     expose:
       host: demo-taskboard-web
 resources:

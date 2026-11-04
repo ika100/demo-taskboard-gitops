@@ -36,7 +36,9 @@ metadata:
 spec:
   generators:
   - list:
-      elements: []
+      elements:
+      - name: demo-taskboard-api
+      - name: demo-taskboard-web
   template:
     metadata:
       name: '{{name}}-staging'
@@ -135,6 +137,64 @@ spec:
       destination:
         server: https://kubernetes.default.svc
         namespace: demo-taskboard-dev
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: demo-taskboard-addons-staging
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - name: postgres
+  template:
+    metadata:
+      name: addon-{{name}}-staging
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/ika100/demo-taskboard-gitops
+        targetRevision: main
+        path: applications/demo-taskboard/addons/staging/{{name}}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: demo-taskboard-staging
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: demo-taskboard-addons-config-staging
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - name: observability
+  template:
+    metadata:
+      name: addon-{{name}}-staging
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/ika100/demo-taskboard-gitops
+        targetRevision: main
+        path: applications/demo-taskboard/addons/staging/{{name}}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: demo-taskboard-staging
       syncPolicy:
         automated:
           prune: true
