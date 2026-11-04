@@ -52,7 +52,8 @@ Visibility and failures:
 
 Before the first prod promotion:
 
-- **AC-002.14** Given backups are configured in prod, when the first promotion of demo-taskboard-api or demo-taskboard-web to prod is prepared, then a completed on-demand prod backup and a restore of it into a separate copy that was then discarded are on record (with their times), and prod's database was unchanged by the drill.
+- ~~**AC-002.14**~~ withdrawn 2026-11-04: prod's database only exists from the API's first prod promotion, so the drill cannot happen before it; replaced by AC-002.15.
+- **AC-002.15** Given demo-taskboard-api is promoted to prod for the first time, when that promotion is merged, then the same change also turns on the nightly prod backups, and right after it, before prod is used (no task has been created in prod except by the drill), a completed on-demand prod backup and a restore of it into a separate copy that was then discarded are on record with their times, and prod's database is unchanged by the drill.
 
 ## Non-goals
 
@@ -64,16 +65,18 @@ Before the first prod promotion:
 - Copying prod data into dev or staging.
 - Automatic restores or automatic switching: every restore and switch is started by the operator.
 - Encryption of backups beyond what the in-cluster bucket provides, and access rules for the bucket beyond AC-002.5.
-- Regular restore drills after the first one (AC-002.14); a recurring drill can be a later spec.
+- Regular restore drills after the first one (AC-002.15); a recurring drill can be a later spec.
+- Keeping the backup bucket's credentials away from the task API: the platform requires a prod component to use the bucket, so demo-taskboard-api receives them; a platform change to back up without that is a later spec.
 
 ## Open questions
 
 - ~~At what time should the nightly backup run?~~ Answered: 03:00 cluster time; see AC-002.1, AC-002.12.
 - ~~How long should backups be kept, and so how far back can prod be restored?~~ Answered: 30 days; see AC-002.4, AC-002.11.
 - ~~Should dev and staging be backed up too?~~ Answered: no, prod only; see Non-goals.
-- ~~Is a restore drill in prod (one on-demand backup, a restore into a separate copy, then discard) required before the first prod promotion?~~ Answered: yes; see AC-002.14.
+- ~~Is a restore drill in prod (one on-demand backup, a restore into a separate copy, then discard) required before the first prod promotion?~~ Answered: yes; see AC-002.15 (was AC-002.14).
 
 ## Changelog
 
 - 2026-11-04 created
 - 2026-11-04 amended: 4 open questions answered (03:00, 30 days, prod only, drill before first prod promotion); no criterion added or withdrawn.
+- 2026-11-04 amended: AC-002.14 drill moves to right after the first prod promotion (prod's database only exists from then); the API receives the backup bucket's credentials (platform constraint), noted as accepted risk. AC-002.14 withdrawn and replaced by AC-002.15 (behaviour changed, so a new id per the amending rules).
